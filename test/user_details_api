@@ -1,0 +1,18 @@
+# user_details_api.py
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from database import SessionLocal
+from models import UserProfile
+
+router = APIRouter(prefix="/api/user", tags=["User"])
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@router.get("/Get all user profiles")
+def get_all_users(db: Session = Depends(get_db)):
+    return db.query(UserProfile).all()

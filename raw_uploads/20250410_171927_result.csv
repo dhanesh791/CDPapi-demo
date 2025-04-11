@@ -1,0 +1,6 @@
+﻿"cookie","email","phone_number","city","state","country","age","gender","income","education","interests__001","interests__002","interests__003"
+"user_001","alice@example.com","1234567890","New York","NY","USA","28","Female","70000-90000","Bachelor's","fashion","music","movies"
+"user_002","bob@example.com","0987654321","San Francisco","CA","USA","35","Male","90000-110000","Master's","tech","books","finance"
+"user_003","charlie@example.com","null","Chicago","IL","USA","22","Non-binary","30000-50000","High School","gaming","food","sports"
+"user_004","diana@example.com","1122334455","Austin","TX","USA","40","Female","50000-70000","PhD","politics","education","art"
+"user_005","edward@example.com","6677889900","Seattle","WA","USA","30","Male","60000-80000","Bachelor's","travel","health","photography"

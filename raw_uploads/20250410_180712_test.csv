@@ -1,0 +1,13 @@
+{
+  "cookie": "test_kafka_007",
+  "email": "fix@example.com",
+  "phone_number": "1234567890",
+  "city": "Austin",
+  "state": "Texas",
+  "country": "USA",
+  "age": 30,
+  "gender": "Male",
+  "income": "90000",
+  "education": "Bachelor's",
+  "interests": ["tech", "music"]
+}

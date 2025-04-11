@@ -1,0 +1,25 @@
+def save_cohorts_new_table(df, db_path="user_profiles.db", table_name="user_cohorts"):
+    conn = sqlite3.connect(db_path)
+    df_to_save = df[['cookie', 'cohorts']].copy()
+    df_to_save['cohorts'] = df_to_save['cohorts'].apply(lambda x: str(x))  # Save as string
+    df_to_save.to_sql(table_name, conn, if_exists="replace", index=False)
+    conn.close()
+    print(f"✅ Cohorts saved to new table '{table_name}' with only cookie and cohorts.")
+
+save_cohorts_new_table(df, db_path="user_profiles.db", table_name="user_cohorts")
+
+def update_existing_table_with_cohorts(df, db_path="user_profiles.db", table_name="user_profiles"):
+    conn = sqlite3.connect(db_path)
+    df_existing = pd.read_sql_query(f"SELECT * FROM {table_name}", conn)
+
+    # Merge updated cohorts into original dataframe
+    df_cohorts = df[['cookie', 'cohorts']].copy()
+    df_cohorts['cohorts'] = df_cohorts['cohorts'].apply(lambda x: str(x))
+    df_merged = df_existing.merge(df_cohorts, on='cookie', how='left')
+
+    # Overwrite the table with the new merged data
+    df_merged.to_sql(table_name, conn, if_exists="replace", index=False)
+    conn.close()
+    print(f"✅ Existing table '{table_name}' updated with new 'cohorts' column.")
+
+update_existing_table_with_cohorts(df, db_path="user_profiles.db", table_name="user_profiles")

@@ -1,0 +1,5 @@
+# ML Model 
+model = joblib.load("models/interest_segment_model.pkl")
+vectorizer = joblib.load("models/interest_vectorizer.pkl")
+mlb = joblib.load("models/interest_label_binarizer.pkl")
+

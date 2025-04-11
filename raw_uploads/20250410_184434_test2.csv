@@ -1,0 +1,6 @@
+cookie,email,phone_number,city,state,country,age,gender,income,education,interests
+cookie001,john@example.com,1234567890,Los Angeles,CA,USA,23,Male,75000,Bachelor's,"tech, gaming"
+cookie002,susan@example.com,9876543210,New York,NY,USA,35,Female,88000,Master's,"music, fashion"
+cookie003,daniel@example.com,5432167890,Austin,TX,USA,29,Male,92000,PhD,"education, politics"
+cookie004,maria@example.com,2345678901,Miami,FL,USA,41,Female,110000,Master's,"finance, travel"
+cookie005,bob@example.com,8765432109,Seattle,WA,USA,50,Male,102000,High School,"art, photography"

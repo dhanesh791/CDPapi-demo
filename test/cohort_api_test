@@ -1,0 +1,36 @@
+@app.post("/bulk-predict123")
+def batch_predict_and_update():
+    try:
+        conn = sqlite3.connect("user_profiles.db")
+        cursor = conn.cursor()
+
+        # Add 'cohorts' column if it doesn't exist
+        cursor.execute("PRAGMA table_info(user_profiles)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'cohorts' not in columns:
+            cursor.execute("ALTER TABLE user_profiles ADD COLUMN cohorts TEXT")
+
+        # Load all users
+        df = pd.read_sql_query("SELECT * FROM user_profiles", conn)
+
+        # Convert interests from string to list (if needed)
+        df['interests'] = df['interests'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+
+        # Predict cohorts
+        df['cohorts'] = df['interests'].apply(predict_cohort)
+
+        # Convert list columns to comma-separated strings
+        df['cohorts'] = df['cohorts'].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+
+        # Update each row in DB
+        for index, row in df.iterrows():
+            cursor.execute(
+                "UPDATE user_profiles SET cohorts = ? WHERE cookie = ?",
+                (row['cohorts'], row['cookie'])
+            )
+
+        conn.commit()
+        conn.close()
+        return {"message": "✅ Cohorts updated in existing user_profiles table."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

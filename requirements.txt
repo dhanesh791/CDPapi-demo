@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+pandas
+scikit-learn
+joblib
+python-multipart
+jinja2
+aiofiles
+python-dotenv
+openpyxl
+kafka-python
