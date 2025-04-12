@@ -11,3 +11,4 @@ aiofiles
 python-dotenv
 openpyxl
 kafka-python
+python-jose
