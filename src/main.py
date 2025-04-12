@@ -203,7 +203,7 @@ def ingest_bulk_users(users: List[UserProfileInput]):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Add your frontend URL here
+    allow_origins=["https://cd-papi-demo.vercel.app"],  # Add your frontend URL here
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
