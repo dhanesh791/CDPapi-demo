@@ -19,7 +19,7 @@ from api.cohort_users_api import router as cohort_router
 from api.cohort_prediction_api import router as prediction_router
 from cohort_prediction import predict_cohort, load_model
 from api.segment_user_api import router as segment_router
-from kafka_routes import router as kafka_router
+#from kafka_routes import router as kafka_router
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -219,7 +219,7 @@ app.include_router(prediction_router)
 
 app.include_router(segment_router)
 
-app.include_router(kafka_router)   
+#app.include_router(kafka_router)   
 
 
 app.include_router(user_router)
