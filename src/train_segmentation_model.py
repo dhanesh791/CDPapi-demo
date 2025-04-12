@@ -16,8 +16,22 @@ from sklearn.multiclass import OneVsRestClassifier
 conn = sqlite3.connect("user_profiles.db")
 df = pd.read_sql_query("SELECT cookie, interests FROM user_profiles", conn)
 conn.close()
+def parse_interests(value):
+            try:
+                # Try to safely evaluate the string to a Python list
+                if isinstance(value, str):
+                    result = ast.literal_eval(value)
+                    if isinstance(result, list):
+                        return result
+                    return [str(result)]
+                elif isinstance(value, list):
+                    return value
+                else:
+                    return [str(value)]
+            except Exception:
+                return [str(value).strip().lower()] if value else []
 
-df['interests'] = df['interests'].apply(lambda x: ast.literal_eval(x) if x else [])
+df['interests'] = df['interests'].apply(parse_interests)
 
 # Define cohort mapping
 interest_to_cohort = {
