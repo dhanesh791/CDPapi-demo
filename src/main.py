@@ -24,6 +24,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from api.user_details_api import router as user_router
+from fastapi import Depends
+from auth import verify_user
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import Depends
+from jose import JWTError, jwt
+from auth import router as auth_router
+from datetime import timedelta, datetime
+
 
 
 app = FastAPI()
@@ -32,9 +40,6 @@ router = APIRouter()
 
 
 app = FastAPI()
-
-templates = Jinja2Templates(directory="templates")  # Create a 'templates/' folder in project root
-
 
 # --- SQLAlchemy Setup ---
 DATABASE_URL = "sqlite:///./user_profiles.db"
@@ -99,9 +104,14 @@ def merge_profiles(existing: UserProfile, incoming: UserProfileInput):
     existing.interests = list(existing_interests.union(new_interests))
     return existing
 
-# --- /ingest Endpoint ---
-@app.get("/")
+# auth
 
+
+
+
+
+
+@app.get("/")
 def root():
     db = SessionLocal()
     try:
@@ -121,6 +131,12 @@ def root():
             raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+
+@app.get("/api/secure-users")
+def secure_users(user: str = Depends(verify_user)):
+    return {"message": f"Hello {user}, access granted to secure endpoint."}
+app.include_router(auth_router)
 
 @app.get("/clean-users")
 def clean_users():
@@ -231,7 +247,7 @@ def get_stats():
 
 # Get all users with pagination
 @app.get("/api/users")
-def get_users(skip: int = 0, limit: int = 10):
+def get_users(skip: int = 0, limit: int = 1000):
     db = SessionLocal()
     try:
         users = db.query(UserProfile).offset(skip).limit(limit).all()
