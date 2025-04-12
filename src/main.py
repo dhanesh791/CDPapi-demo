@@ -50,7 +50,7 @@ SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
 with engine.connect() as conn:
-    result = conn.execute("PRAGMA table_info(user_profiles)")
+    result = conn.execute(text("PRAGMA table_info(user_profiles)"))
     columns = [row[1] for row in result.fetchall()]
     if 'segments' not in columns:
         conn.execute("ALTER TABLE user_profiles ADD COLUMN segments ")
