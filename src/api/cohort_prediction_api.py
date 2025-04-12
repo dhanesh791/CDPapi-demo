@@ -39,8 +39,22 @@ def batch_predict_and_update():
 
         df = pd.read_sql_query("SELECT * FROM user_profiles", conn)
 
-        # Parse interests properly
-        df['interests'] = df['interests'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+        def parse_interests(value):
+            try:
+                # Try to safely evaluate the string to a Python list
+                if isinstance(value, str):
+                    result = ast.literal_eval(value)
+                    if isinstance(result, list):
+                        return result
+                    return [str(result)]
+                elif isinstance(value, list):
+                    return value
+                else:
+                    return [str(value)]
+            except Exception:
+                return [str(value).strip().lower()] if value else []
+
+        df['interests'] = df['interests'].apply(parse_interests)
 
         # Predict cohorts for each user
         df['cohorts'] = df['interests'].apply(lambda x: list(predict_cohort(x)) if x else [])
