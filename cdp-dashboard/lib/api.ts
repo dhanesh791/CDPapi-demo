@@ -1,5 +1,5 @@
 // Use the environment variable for the API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cdpapi-demo.onrender.com"
 
 // Helper function for API requests with better error handling
 async function fetchAPI(endpoint: string, options = {}) {
