@@ -19,15 +19,15 @@ import { getUsers } from "@/lib/api"
 
 interface User {
   cookie: string
-  email: string
-  phone_number: string
-  city: string
-  state: string
-  country: string
-  age: number
-  gender: string
-  income: string
-  education: string
+  email: string | null
+  phone_number: string | null
+  city: string | null
+  state: string | null
+  country: string | null
+  age: number | null
+  gender: string | null
+  income: string | null
+  education: string | null
   interests: string[]
   segments: string[]
   cohorts: string[]
@@ -46,12 +46,12 @@ export function UsersTable() {
       try {
         setLoading(true)
         const data = await getUsers(page, limit)
-        setUsers(data.users)
-        setTotalUsers(data.total)
+        setUsers(data.users || [])
+        setTotalUsers(data.total || 0)
         setError(null)
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch users:", err)
-        setError("Failed to load users")
+        setError(err.message || "Failed to load users")
         // Fallback to example data
         setUsers([
           {
@@ -79,7 +79,21 @@ export function UsersTable() {
     fetchUsers()
   }, [page])
 
-  const totalPages = Math.ceil(totalUsers / limit)
+  const totalPages = Math.ceil(totalUsers / limit) || 1
+
+  // Helper function to safely parse array fields
+  const parseArrayField = (field: any): string[] => {
+    if (!field) return []
+    if (Array.isArray(field)) return field
+    if (typeof field === "string") {
+      // Try to parse as comma-separated values
+      return field
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    }
+    return []
+  }
 
   return (
     <Card>
@@ -113,17 +127,17 @@ export function UsersTable() {
                   {users.map((user) => (
                     <TableRow key={user.cookie}>
                       <TableCell className="font-medium">{user.cookie}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.phone_number}</TableCell>
-                      <TableCell>{[user.city, user.state, user.country].filter(Boolean).join(", ")}</TableCell>
-                      <TableCell>{user.age}</TableCell>
-                      <TableCell>{user.gender}</TableCell>
-                      <TableCell>{user.income}</TableCell>
-                      <TableCell>{user.education}</TableCell>
+                      <TableCell>{user.email || "-"}</TableCell>
+                      <TableCell>{user.phone_number || "-"}</TableCell>
+                      <TableCell>{[user.city, user.state, user.country].filter(Boolean).join(", ") || "-"}</TableCell>
+                      <TableCell>{user.age || "-"}</TableCell>
+                      <TableCell>{user.gender || "-"}</TableCell>
+                      <TableCell>{user.income || "-"}</TableCell>
+                      <TableCell>{user.education || "-"}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1 max-w-[150px]">
-                          {user.interests?.map((interest) => (
-                            <Badge key={interest} variant="outline" className="text-xs">
+                          {parseArrayField(user.interests).map((interest, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
                               {interest}
                             </Badge>
                           ))}
@@ -131,8 +145,8 @@ export function UsersTable() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1 max-w-[150px]">
-                          {user.segments?.map((segment) => (
-                            <Badge key={segment} variant="default" className="text-xs">
+                          {parseArrayField(user.segments).map((segment, i) => (
+                            <Badge key={i} variant="default" className="text-xs">
                               {segment}
                             </Badge>
                           ))}
@@ -140,8 +154,8 @@ export function UsersTable() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1 max-w-[150px]">
-                          {user.cohorts?.map((cohort) => (
-                            <Badge key={cohort} variant="secondary" className="text-xs">
+                          {parseArrayField(user.cohorts).map((cohort, i) => (
+                            <Badge key={i} variant="secondary" className="text-xs">
                               {cohort}
                             </Badge>
                           ))}
