@@ -43,7 +43,7 @@ export function CohortsList() {
   useEffect(() => {
     const fetchCohorts = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/user") // Fetch ALL users
+        const res = await fetch("https://cdpapi-demo.onrender.com/api/users") // Fetch ALL users
         const data: UserProfile[] = await res.json()
 
         const cohortMap: Record<string, number> = {}
