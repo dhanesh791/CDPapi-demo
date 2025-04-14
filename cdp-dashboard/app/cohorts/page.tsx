@@ -1,5 +1,6 @@
-import { CohortsHeader } from "@/components/cohorts/cohorts-header"
 import { CohortsList } from "@/components/cohorts/cohorts-list"
+import { CohortsHeader } from "@/components/cohorts/cohorts-header"
+
 
 export default function CohortsPage() {
   return (
