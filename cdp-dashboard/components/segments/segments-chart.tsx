@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getUsers } from "@/lib/api"
 
 interface SegmentData {
   name: string
@@ -14,20 +15,92 @@ interface SegmentData {
 export function SegmentsChart() {
   const [segments, setSegments] = useState<SegmentData[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // In a real implementation, you would fetch this data from your API
-    setTimeout(() => {
-      setSegments([
-        { name: "High Value", value: 25, color: "rgb(54, 162, 235)" },
-        { name: "Tech Enthusiast", value: 20, color: "rgb(255, 99, 132)" },
-        { name: "Frequent Visitor", value: 18, color: "rgb(255, 205, 86)" },
-        { name: "New Visitor", value: 15, color: "rgb(75, 192, 192)" },
-        { name: "Inactive", value: 12, color: "rgb(153, 102, 255)" },
-        { name: "Other", value: 10, color: "rgb(201, 203, 207)" },
-      ])
-      setLoading(false)
-    }, 1500)
+    async function fetchSegmentData() {
+      try {
+        setLoading(true)
+        // Fetch all users to analyze segments
+        const data = await getUsers(1, 1000) // Get a large batch of users
+
+        // Count segments
+        const segmentCounts: Record<string, number> = {}
+        let totalSegments = 0
+
+        data.users.forEach((user: any) => {
+          if (user.segments && Array.isArray(user.segments)) {
+            user.segments.forEach((segment: string) => {
+              if (segment) {
+                segmentCounts[segment] = (segmentCounts[segment] || 0) + 1
+                totalSegments++
+              }
+            })
+          } else if (typeof user.segments === "string" && user.segments) {
+            const segments = user.segments
+              .split(",")
+              .map((s: string) => s.trim())
+              .filter(Boolean)
+            segments.forEach((segment: string) => {
+              segmentCounts[segment] = (segmentCounts[segment] || 0) + 1
+              totalSegments++
+            })
+          }
+        })
+
+        // Convert to percentage and format for chart
+        const colors = [
+          "rgb(54, 162, 235)",
+          "rgb(255, 99, 132)",
+          "rgb(255, 205, 86)",
+          "rgb(75, 192, 192)",
+          "rgb(153, 102, 255)",
+          "rgb(201, 203, 207)",
+        ]
+
+        const segmentData = Object.entries(segmentCounts)
+          .map(([name, count], index) => ({
+            name,
+            value: Math.round((count / Math.max(totalSegments, 1)) * 100),
+            color: colors[index % colors.length],
+          }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 6) // Take top 6 segments
+
+        if (segmentData.length === 0) {
+          // Fallback to example data if no segments found
+          setSegments([
+            { name: "High Value", value: 25, color: "rgb(54, 162, 235)" },
+            { name: "Tech Enthusiast", value: 20, color: "rgb(255, 99, 132)" },
+            { name: "Frequent Visitor", value: 18, color: "rgb(255, 205, 86)" },
+            { name: "New Visitor", value: 15, color: "rgb(75, 192, 192)" },
+            { name: "Inactive", value: 12, color: "rgb(153, 102, 255)" },
+            { name: "Other", value: 10, color: "rgb(201, 203, 207)" },
+          ])
+        } else {
+          setSegments(segmentData)
+        }
+
+        setError(null)
+      } catch (err: any) {
+        console.error("Failed to fetch segment data:", err)
+        setError(err.message || "Failed to load segment data")
+
+        // Fallback to example data
+        setSegments([
+          { name: "High Value", value: 25, color: "rgb(54, 162, 235)" },
+          { name: "Tech Enthusiast", value: 20, color: "rgb(255, 99, 132)" },
+          { name: "Frequent Visitor", value: 18, color: "rgb(255, 205, 86)" },
+          { name: "New Visitor", value: 15, color: "rgb(75, 192, 192)" },
+          { name: "Inactive", value: 12, color: "rgb(153, 102, 255)" },
+          { name: "Other", value: 10, color: "rgb(201, 203, 207)" },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSegmentData()
   }, [])
 
   return (
@@ -100,6 +173,11 @@ export function SegmentsChart() {
                 ))}
               </div>
             </div>
+            {error && (
+              <div className="absolute top-0 left-0 right-0 p-2 text-xs text-amber-700 bg-amber-50 rounded-md">
+                {error}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
