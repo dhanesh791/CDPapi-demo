@@ -17,6 +17,7 @@ export function IngestUpload() {
   const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle")
   const [dryRun, setDryRun] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -50,6 +51,7 @@ export function IngestUpload() {
 
     setIsUploading(true)
     setErrorMessage(null)
+    setSuccessMessage(null)
 
     try {
       const formData = new FormData()
@@ -58,22 +60,26 @@ export function IngestUpload() {
 
       const response = await uploadFile(formData)
 
-      if (response.status === "success") {
+      if (response.summary) {
         setUploadStatus("success")
+        setSuccessMessage(
+          `Processed ${response.summary.total} records: ${response.summary.success} successful, ${response.summary.failed} failed.`,
+        )
 
-        // Reset after 3 seconds
+        // Reset after 5 seconds
         setTimeout(() => {
           setFile(null)
           setUploadStatus("idle")
-        }, 3000)
+          setSuccessMessage(null)
+        }, 5000)
       } else {
         setUploadStatus("error")
         setErrorMessage(response.detail || "Upload failed")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error)
       setUploadStatus("error")
-      setErrorMessage("Network error or server unavailable")
+      setErrorMessage(error.message || "Network error or server unavailable")
     } finally {
       setIsUploading(false)
     }
@@ -119,7 +125,7 @@ export function IngestUpload() {
           <div className="flex flex-col items-center p-12">
             <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
             <p className="font-medium">Upload Successful!</p>
-            <p className="text-sm text-muted-foreground mt-1">Your data is being processed</p>
+            <p className="text-sm text-muted-foreground mt-1">{successMessage || "Your data is being processed"}</p>
           </div>
         ) : (
           <div className="flex flex-col items-center p-12">
