@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import {
   Card,
   CardContent,
@@ -23,7 +23,8 @@ import {
 interface UserProfile {
   cookie: string
   email?: string
-  cohorts?: string
+  cohorts?: string[]
+  interests?: string[]
   created_at?: string
 }
 
@@ -43,36 +44,45 @@ export function CohortsList() {
   useEffect(() => {
     const fetchCohorts = async () => {
       try {
-        const res = await fetch("https://cdpapi-demo.onrender.com/api/users") // Fetch ALL users
-        const data: UserProfile[] = await res.json()
+        const res = await fetch("https://cdpapi-demo.onrender.com/api/users")
+        const result = await res.json()
+        const data: UserProfile[] = result.users || []
 
-        const cohortMap: Record<string, number> = {}
+        const cohortMap: Record<string, { count: number; interests: string[] }> = {}
 
         data.forEach((user) => {
-          const cohortList = (user.cohorts || "")
-            .split(",")
-            .map((c) => c.trim())
-            .filter(Boolean)
+          const cohortList = (user.cohorts || []) as string[]
+          const interestList = (user.interests || []) as string[]
 
           cohortList.forEach((cohort) => {
-            cohortMap[cohort] = (cohortMap[cohort] || 0) + 1
+            const trimmed = cohort.trim()
+            if (!trimmed) return
+
+            if (!cohortMap[trimmed]) {
+              cohortMap[trimmed] = { count: 0, interests: [] }
+            }
+
+            cohortMap[trimmed].count++
+            cohortMap[trimmed].interests.push(...interestList)
           })
         })
 
         const finalList: Cohort[] = Object.entries(cohortMap).map(
-          ([name, count], idx) => ({
+          ([name, { count, interests }], idx) => ({
             id: `c${idx + 1}`,
             name,
-            description: `Users tagged under '${name}' cohort.`,
+            description: `Users tagged under ${name} cohort.`,
             userCount: count,
             createdAt: new Date().toISOString().slice(0, 10),
-            criteria: ["Auto-generated from ML cohort prediction"],
+            criteria: [
+              `Common interests: ${Array.from(new Set(interests)).slice(0, 3).join(", ") || "N/A"}`,
+            ],
           })
         )
 
         setCohorts(finalList)
-      } catch (error) {
-        console.error("Error fetching cohorts:", error)
+      } catch (err) {
+        console.error("Error fetching cohorts:", err)
       } finally {
         setLoading(false)
       }
