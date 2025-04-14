@@ -42,33 +42,15 @@ async function fetchAPI(endpoint: string, options = {}) {
   }
 }
 
-// Dashboard stats - Use the actual endpoint from your FastAPI backend
-// If you don't have a /api/stats endpoint, change this to match your actual endpoint
+// Dashboard stats
 export async function getStats() {
-  // Try different endpoints if your backend uses a different URL structure
-  try {
-    return await fetchAPI("/api/stats")
-  } catch (error) {
-    // Fallback to root endpoint if /api/stats doesn't exist
-    console.log("Trying fallback endpoint...")
-    return fetchAPI("/")
-  }
+  return fetchAPI("/api/stats")
 }
 
 // Users
 export async function getUsers(page = 1, limit = 10) {
-  // Adjust this to match your actual endpoint
-  try {
-    const skip = (page - 1) * limit
-    return await fetchAPI(`/api/users?skip=${skip}&limit=${limit}`)
-  } catch (error) {
-    console.error("Error fetching users:", error)
-    // Return mock data as fallback
-    return {
-      users: [],
-      total: 0,
-    }
-  }
+  const skip = (page - 1) * limit
+  return fetchAPI(`/api/users?skip=${skip}&limit=${limit}`)
 }
 
 export async function getUserById(id: string) {
@@ -88,19 +70,18 @@ export async function updateUser(userData: any) {
     body: JSON.stringify([userData]),
   })
 }
-
 // Cohorts
 export async function getCohorts() {
-  return fetchAPI("/api/cohorts")
+  const res = await fetchAPI(`/api/users?skip=0&limit=1000`);
+  return res.users; // assuming the response format is { users: [...] }
 }
 
-export async function getCohortById(id: string) {
-  return fetchAPI(`/api/cohorts/${id}`)
-}
 
 // Segments
 export async function getSegments() {
-  return fetchAPI("/api/segments")
+  // Your backend doesn't have a specific segments endpoint yet
+  // This could be implemented later
+  return fetchAPI("/api/segments").catch(() => ({ segments: [] }))
 }
 
 // Data Ingestion
@@ -111,18 +92,18 @@ export async function uploadFile(formData: FormData) {
   }).then((res) => res.json())
 }
 
-export async function getIngestHistory() {
-  return fetchAPI("/api/ingest/history")
-}
-
 // Predictions
 export async function runPrediction(data: any) {
-  return fetchAPI("/predict-cohort", {
+  return fetchAPI("/bulk-predict", {
     method: "POST",
     body: JSON.stringify(data),
   })
 }
 
-export async function getPredictionHistory() {
-  return fetchAPI("/api/predictions/history")
+// Training
+export async function trainModel() {
+  return fetchAPI("/train", {
+    method: "POST",
+  })
 }
+
